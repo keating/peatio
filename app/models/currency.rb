@@ -9,8 +9,9 @@ class Currency < Settingslogic
   end
 
   def self.coin_wallets
-    @wallets ||= extract_coin_property(:hdwallet) do |hex|
-      HDWallet.new hex
+    @wallets ||= extract_coin_property(:hdwallet) do |currency, hex|
+      last_index = PaymentAddress.max_address_index(currency)
+      HDWallet.new hex, last_index: last_index
     end
   end
 
@@ -42,7 +43,7 @@ class Currency < Settingslogic
     HashWithIndifferentAccess[
       self.coins.map do |k, v|
         value = v[property.to_s]
-        value = yield value if block_given?
+        value = yield(k, value) if block_given?
         [k, value]
       end
     ]
