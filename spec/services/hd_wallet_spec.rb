@@ -11,6 +11,11 @@ describe HDWallet do
       expect(wallet.root_node.private_key).to be_nil
     end
 
+    it 'sets last index if passed in' do
+      wallet = described_class.new(serialized, last_index: 42)
+      expect(wallet.last_index).to eq(42)
+    end
+
     context 'when serialization of a public node with private key is passed in' do
       let(:serialized) { master.node_for_path("m/0'/0").to_serialized_address(:private) }
 
@@ -34,12 +39,18 @@ describe HDWallet do
     end
   end
 
-  describe '#address_at' do
-    it 'generate address at the specified index at 1 level down from the root' do
-      address = wallet.address_at(42)
+  describe '#next_address' do
+    it 'generate addresses at 1 level down from the root' do
+      address = wallet.next_address()
 
-      subnode = wallet.root_node.subnode(42)
+      subnode = wallet.root_node.subnode(0)
       expect(subnode.depth).to eq(wallet.root_node.depth + 1)
+      expect(address).to eq(subnode.to_address)
+
+      wallet.next_address()
+      address = wallet.next_address()
+
+      subnode = wallet.root_node.subnode(2)
       expect(address).to eq(subnode.to_address)
     end
   end
