@@ -8,5 +8,9 @@ class PaymentAddress < ActiveRecord::Base
 
   scope :using, -> { last }
 
-  validates_uniqueness_of :address
+  validates_uniqueness_of :address, :address_index
+
+  def self.max_address_index(currency)
+    self.with_currency(currency).maximum(:address_index) || -1
+  end
 end
